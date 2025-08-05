@@ -91,6 +91,7 @@ class _SingleDayHeader<T extends Object?> extends StatelessWidget {
         return ExpandablePageView(
           controller: viewController.headerController,
           itemCount: viewController.numberOfPages,
+          numVisibleDays: viewConfiguration.numberOfDays,
           itemBuilder: (context, index) {
             final visibleRange = pageNavigation.dateTimeRangeFromIndex(index);
 
@@ -169,6 +170,7 @@ class _MultiDayHeader<T extends Object?> extends StatelessWidget {
         return ExpandablePageView(
           controller: viewController.headerController,
           itemCount: viewController.numberOfPages,
+          numVisibleDays: viewConfiguration.numberOfDays,
           itemBuilder: (context, index) {
             final visibleRange = pageNavigation.dateTimeRangeFromIndex(index);
             final visibleDates = visibleRange.dates();
@@ -262,6 +264,7 @@ class _FreeScrollHeader<T extends Object?> extends StatelessWidget {
         return ExpandablePageView(
           controller: viewController.headerController,
           itemCount: viewController.numberOfPages,
+          numVisibleDays: viewConfiguration.numberOfDays,
           itemBuilder: (context, index) {
             final visibleRange = pageNavigation.dateTimeRangeFromIndex(index);
             final visibleDates = visibleRange.dates();

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 /// Thanks to https://gist.github.com/andrzejchm for https://gist.github.com/andrzejchm/02c1728b6f31a69fde2fb4e10b636060
@@ -6,12 +8,14 @@ class ExpandablePageView extends StatefulWidget {
   final int itemCount;
   final Widget Function(BuildContext context, int index) itemBuilder;
   final PageController controller;
+  final int numVisibleDays;
 
   const ExpandablePageView({
     super.key,
     required this.controller,
     required this.itemCount,
     required this.itemBuilder,
+    required this.numVisibleDays,
   });
 
   @override
@@ -26,7 +30,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   late int _currentPage;
 
   /// The current height of the page view.
-  double get _currentHeight => _heights.elementAtOrNull(_currentPage) ?? 80;
+  double get _currentHeight => _heights.sublist(_currentPage, _currentPage + widget.numVisibleDays).reduce(max);
 
   @override
   void initState() {
