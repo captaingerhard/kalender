@@ -123,7 +123,9 @@ class _DayDragTargetState<T extends Object?> extends State<DayDragTarget<T>> wit
             // // Check if the event is a multi day event.
             // if (!showMultiDayEvents && event.isMultiDayEvent) return false;
             // Calculate the size of the feedback widget.
-            final eventHeight = eventDuration.inMinutes * heightPerMinute;
+            final eventHeight = event.isMultiDayEvent
+                ? (snapRange.inMinutes * heightPerMinute)
+                : (eventDuration.inMinutes * heightPerMinute);
             // Set the size of the feedback widget.
 
             context.feedbackWidgetSizeNotifier<T>().value = Size(dayWidth, eventHeight);
