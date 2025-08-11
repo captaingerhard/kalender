@@ -306,12 +306,15 @@ class _FreeScrollHeader<T extends Object?> extends StatelessWidget {
               children: [
                 Row(children: [...dayHeaders]),
                 if (configuration.showTiles)
-                  Stack(
-                    children: [
-                      Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
-                      ConstrainedBox(constraints: constraints, child: multiDayEvents),
-                      Positioned.fill(child: multiDayDragTarget),
-                    ],
+                  Flexible(
+                    fit: FlexFit.loose,
+                    child: Stack(
+                      children: [
+                        Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
+                        ConstrainedBox(constraints: constraints, child: multiDayEvents),
+                        Positioned.fill(child: multiDayDragTarget),
+                      ],
+                    ),
                   ),
               ],
             );
