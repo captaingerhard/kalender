@@ -67,7 +67,7 @@ class _MultiDayDragTargetState<T extends Object?> extends State<MultiDayDragTarg
           details,
           onResize: (event, direction) => direction.horizontal,
           onReschedule: (event) {
-            if (!widget.allowSingleDayEvents && !event.isMultiDayEvent) return false;
+            // if (!widget.allowSingleDayEvents && !event.isMultiDayEvent) return false;
             // Set the size of the feedback widget.
             context.feedbackWidgetSizeNotifier<T>().value =
                 Size(min(pageWidth, dayWidth * event.datesSpanned.length), tileHeight);
