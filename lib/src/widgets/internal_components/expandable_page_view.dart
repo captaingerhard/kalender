@@ -68,6 +68,7 @@ class _ExpandablePageViewState extends State<ExpandablePageView> {
   Widget _itemBuilder(BuildContext context, int index) {
     final item = widget.itemBuilder(context, index);
     return OverflowBox(
+      key: ValueKey('overflow_${index}_$_currentHeight'),
       minHeight: 0,
       maxHeight: _currentHeight,
       alignment: Alignment.topCenter,
