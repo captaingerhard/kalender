@@ -120,8 +120,8 @@ class _DayDragTargetState<T extends Object?> extends State<DayDragTarget<T>> wit
             final eventDuration = event.duration;
             // Check if the event will fit within the time of day range.
             if (!timeOfDayRange.isAllDay && event.duration > timeOfDayRange.duration) return false;
-            // Check if the event is a multi day event.
-            if (!showMultiDayEvents && event.isMultiDayEvent) return false;
+            // // Check if the event is a multi day event.
+            // if (!showMultiDayEvents && event.isMultiDayEvent) return false;
             // Calculate the size of the feedback widget.
             final eventHeight = eventDuration.inMinutes * heightPerMinute;
             // Set the size of the feedback widget.
@@ -248,7 +248,7 @@ class _DayDragTargetState<T extends Object?> extends State<DayDragTarget<T>> wit
     }
 
     // Calculate the new dateTimeRange for the event.
-    final duration = event.dateTimeRangeAsUtc.duration;
+    final duration = event.isMultiDayEvent && !showMultiDayEvents ? snapRange : event.dateTimeRangeAsUtc.duration;
     var end = start.add(duration);
 
     // Add now to the snap points.
