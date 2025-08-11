@@ -137,7 +137,7 @@ class _MultiDayDragTargetState<T extends Object?> extends State<MultiDayDragTarg
   CalendarEvent<T>? rescheduleEvent(CalendarEvent<T> event, DateTime cursorDateTime) {
     // Calculate the new dateTimeRange for the event.
     final newStartTime = cursorDateTime;
-    final duration = event.dateTimeRangeAsUtc.duration;
+    final duration = event.isMultiDayEvent ? event.dateTimeRangeAsUtc.duration : const Duration(days: 1);
     final endTime = newStartTime.add(duration);
     final newRange = DateTimeRange(start: newStartTime, end: endTime);
 
