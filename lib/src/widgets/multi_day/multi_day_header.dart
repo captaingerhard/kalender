@@ -307,7 +307,7 @@ class _FreeScrollHeader<T extends Object?> extends StatelessWidget {
                 Row(children: [...dayHeaders]),
                 if (configuration.showTiles)
                   Flexible(
-                    fit: FlexFit.loose,
+                    fit: FlexFit.tight,
                     child: Stack(
                       children: [
                         Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
