@@ -25,7 +25,6 @@ class CalendarLayoutDelegate extends MultiChildLayoutDelegate {
         minWidth: width,
         maxWidth: width,
         minHeight: 0.0,
-        maxHeight: size.height,
       );
 
       headerSize = layoutChild(
@@ -45,7 +44,7 @@ class CalendarLayoutDelegate extends MultiChildLayoutDelegate {
       final constraints = BoxConstraints(
         minWidth: width,
         maxWidth: width,
-        maxHeight: maxHeight,
+        maxHeight: maxHeight > 0.0 ? maxHeight : 0.0,
         minHeight: 0.0,
       );
 
