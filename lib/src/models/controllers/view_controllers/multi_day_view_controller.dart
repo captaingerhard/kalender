@@ -37,6 +37,7 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     final timeDifference = initialTimeOfDay.difference(dayStart);
     final initialScrollOffset = timeDifference.inMinutes * (heightPerMinute.value);
     this.scrollController = scrollController ?? ScrollController(initialScrollOffset: initialScrollOffset);
+    customScrollController = scrollController != null;
 
     visibleEvents.value = {};
 
@@ -62,6 +63,8 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
 
   /// The scroll controller used by the view.
   late ScrollController scrollController;
+
+  late bool customScrollController;
 
   /// The height per minute of the view.
   late ValueNotifier<double> heightPerMinute;
@@ -196,6 +199,6 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     pageController.removeListener(pageListener);
     pageController.dispose();
     headerController.dispose();
-    scrollController.dispose();
+    if (!customScrollController) scrollController.dispose();
   }
 }
