@@ -10,6 +10,8 @@ class CalendarView<T extends Object?> extends StatefulWidget {
   /// The [CalendarController] that is used to control the calendar view.
   final CalendarController<T> calendarController;
 
+  final ScrollController? scrollController;
+
   /// The [ViewConfiguration] that will be used to render the calendar view.
   final ViewConfiguration viewConfiguration;
 
@@ -50,6 +52,7 @@ class CalendarView<T extends Object?> extends StatefulWidget {
     required this.eventsController,
     required this.calendarController,
     required this.viewConfiguration,
+    this.scrollController,
     this.callbacks,
     this.components,
     this.header,
@@ -135,6 +138,7 @@ class CalendarViewState<T> extends State<CalendarView<T>> {
           visibleDateTimeRange: widget.calendarController.visibleDateTimeRangeUtc,
           visibleEvents: widget.calendarController.visibleEvents,
           initialDate: initialDate ?? widget.calendarController.initialDate,
+          scrollController: widget.scrollController,
         ),
       const (MonthViewConfiguration) => MonthViewController<T>(
           viewConfiguration: viewConfiguration as MonthViewConfiguration,

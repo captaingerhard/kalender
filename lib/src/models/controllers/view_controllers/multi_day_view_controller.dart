@@ -7,6 +7,7 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     required this.visibleDateTimeRange,
     required this.visibleEvents,
     DateTime? initialDate,
+    ScrollController? scrollController,
   }) {
     final pageNavigationFunctions = viewConfiguration.pageNavigationFunctions;
     initialPage = pageNavigationFunctions.indexFromDate(initialDate ?? DateTime.now());
@@ -35,7 +36,7 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     final dayStart = viewConfiguration.timeOfDayRange.start.toDateTime(DateTime.now());
     final timeDifference = initialTimeOfDay.difference(dayStart);
     final initialScrollOffset = timeDifference.inMinutes * (heightPerMinute.value);
-    scrollController = ScrollController(initialScrollOffset: initialScrollOffset);
+    scrollController = scrollController ?? ScrollController(initialScrollOffset: initialScrollOffset);
 
     visibleEvents.value = {};
 
