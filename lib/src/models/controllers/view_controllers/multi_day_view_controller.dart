@@ -36,7 +36,7 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     final dayStart = viewConfiguration.timeOfDayRange.start.toDateTime(DateTime.now());
     final timeDifference = initialTimeOfDay.difference(dayStart);
     final initialScrollOffset = timeDifference.inMinutes * (heightPerMinute.value);
-    scrollController = scrollController ?? ScrollController(initialScrollOffset: initialScrollOffset);
+    this.scrollController = scrollController ?? ScrollController(initialScrollOffset: initialScrollOffset);
 
     visibleEvents.value = {};
 
