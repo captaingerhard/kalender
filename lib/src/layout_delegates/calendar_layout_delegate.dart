@@ -37,9 +37,10 @@ class CalendarLayoutDelegate extends MultiChildLayoutDelegate {
 
     if (bodyId != null) {
       final width = size.width;
-      final height = size.height;
+      // final height = size.height;
       final headerHeight = headerSize?.height ?? 0.0;
-      final maxHeight = height - headerHeight;
+      // final maxHeight = height - headerHeight;
+      const maxHeight = 0.7 * 1440;
 
       final constraints = BoxConstraints(
         minWidth: width,
