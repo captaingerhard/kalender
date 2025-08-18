@@ -178,19 +178,26 @@ class CalendarViewState<T> extends State<CalendarView<T>> {
           eventsController: widget.eventsController,
           child: CalendarControllerProvider<T>(
             notifier: widget.calendarController,
-            child: CustomMultiChildLayout(
-              delegate: CalendarLayoutDelegate(headerId, bodyId),
+            // child: CustomMultiChildLayout(
+            //   delegate: CalendarLayoutDelegate(headerId, bodyId),
+            //   children: [
+            //     if (bodyId != null)
+            //       LayoutId(
+            //         id: bodyId,
+            //         child: widget.body!,
+            //       ),
+            //     if (headerId != null)
+            //       LayoutId(
+            //         id: headerId,
+            //         child: widget.header!,
+            //       ),
+            //   ],
+            // ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                if (bodyId != null)
-                  LayoutId(
-                    id: bodyId,
-                    child: widget.body!,
-                  ),
-                if (headerId != null)
-                  LayoutId(
-                    id: headerId,
-                    child: widget.header!,
-                  ),
+                if (widget.header != null) widget.header!,
+                if (widget.body != null) widget.body!,
               ],
             ),
           ),
