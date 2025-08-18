@@ -59,6 +59,15 @@ class CalendarLayoutDelegate extends MultiChildLayoutDelegate {
   }
 
   @override
+  Size getSize(BoxConstraints constraints) {
+    // In a real app, you would calculate this based on the sizes
+    // of the children you intend to lay out.
+    // For this example, we know the heights are 400 and 600 with 20 spacing.
+    const totalHeight = 0.7 * 1440 * 2;
+    return Size(constraints.maxWidth, totalHeight);
+  }
+
+  @override
   bool shouldRelayout(covariant CalendarLayoutDelegate oldDelegate) {
     return false;
   }
