@@ -180,7 +180,7 @@ class TimeLine extends StatelessWidget with TimeLineUtils {
     final textXOffset = itemSize.height / 2;
     final segmentDuration = this.segmentDuration(timeOfDayRange, heightPerMinute, itemSize.height);
     final segments = timeOfDayRange.splitIntoSegments(segmentDuration);
-    final positionedTimes = segments.indexed.where((e) => e.$1 != 0 && e.$1 != segments.length).map((e) {
+    final positionedTimes = segments.indexed.map((e) {
       final (index, range) = e;
 
       final height = range.duration.inMinutes * heightPerMinute;
@@ -200,7 +200,7 @@ class TimeLine extends StatelessWidget with TimeLineUtils {
           padding: textPadding,
           child: Text(
             key: getTimeKey(displayTime.hour, displayTime.minute),
-            text,
+            (displayTime.hour != 0 || displayTime.minute != 0) ? text : '',
             style: textStyle,
             textDirection: textDirection,
           ),
