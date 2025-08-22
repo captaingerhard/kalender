@@ -200,7 +200,7 @@ class TimeLine extends StatelessWidget with TimeLineUtils {
           padding: textPadding,
           child: Text(
             key: getTimeKey(displayTime.hour, displayTime.minute),
-            (displayTime.hour != 0 || displayTime.minute != 0) ? text : '',
+            ((displayTime.hour != 0 && displayTime.hour != 24) || displayTime.minute != 0) ? text : '',
             style: textStyle,
             textDirection: textDirection,
           ),
