@@ -99,9 +99,9 @@ mixin TimeLineUtils {
     final totalItems = (totalHeight / itemHeight).ceil();
     return switch (totalItems) {
       < 12 => 60,
-      < 24 => 30,
-      < 48 => 15,
-      _ => 5,
+      < 24 => 60,
+      < 48 => 30,
+      _ => 15,
     };
   }
 }
