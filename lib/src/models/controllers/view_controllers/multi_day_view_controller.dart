@@ -117,18 +117,22 @@ class MultiDayViewController<T extends Object?> extends ViewController<T> {
     Curve? scrollCurve,
   }) async {
     // Animate to the date.
-    await animateToDate(date, duration: pageDuration, curve: pageCurve);
+    if (scrollController.hasClients) {
+      await animateToDate(date, duration: pageDuration, curve: pageCurve);
 
-    final startOfDay = viewConfiguration.timeOfDayRange.start.toDateTime(date);
-    final timeDifference = date.difference(startOfDay);
-    final timeOffset = timeDifference.inMinutes * (heightPerMinute.value);
+      final startOfDay = viewConfiguration.timeOfDayRange.start.toDateTime(date);
+      final timeDifference = date.difference(startOfDay);
+      final timeOffset = timeDifference.inMinutes * (heightPerMinute.value);
 
-    // Animate to the offset of the time.
-    return scrollController.animateTo(
-      timeOffset,
-      duration: scrollDuration ?? const Duration(milliseconds: 300),
-      curve: scrollCurve ?? Curves.easeInOut,
-    );
+      // Animate to the offset of the time.
+      return scrollController.animateTo(
+        timeOffset,
+        duration: scrollDuration ?? const Duration(milliseconds: 300),
+        curve: scrollCurve ?? Curves.easeInOut,
+      );
+    } else {
+      return animateToDate(date, duration: pageDuration, curve: pageCurve);
+    }
   }
 
   @override
