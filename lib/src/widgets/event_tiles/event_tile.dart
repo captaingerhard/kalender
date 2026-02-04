@@ -157,30 +157,32 @@ class EventReschedule<T extends Object?> extends StatelessWidget with EventModif
       feedbackTileBuilder: feedbackTileBuilder,
     );
 
-    return isMobileDevice
-        ? LongPressDraggable<Reschedule<T>>(
-            data: rescheduleEvent,
-            feedback: feedback,
-            childWhenDragging: tileWhenDragging,
-            dragAnchorStrategy: dragAnchorStrategy ?? childDragAnchorStrategy,
-            onDragStarted: () {
-              dismissOverlay?.call();
-              selectEvent(context);
-            },
-            maxSimultaneousDrags: 1,
-            child: isDragging && tileWhenDragging != null ? tileWhenDragging : tile,
-          )
-        : Draggable<Reschedule<T>>(
-            data: rescheduleEvent,
-            feedback: feedback,
-            childWhenDragging: tileWhenDragging,
-            dragAnchorStrategy: dragAnchorStrategy ?? childDragAnchorStrategy,
-            onDragStarted: () {
-              dismissOverlay?.call();
-              selectEvent(context);
-            },
-            child: isDragging && tileWhenDragging != null ? tileWhenDragging : tile,
-          );
+    return !event.interaction.allowRescheduling
+        ? tile
+        : (isMobileDevice
+            ? LongPressDraggable<Reschedule<T>>(
+                data: rescheduleEvent,
+                feedback: feedback,
+                childWhenDragging: tileWhenDragging,
+                dragAnchorStrategy: dragAnchorStrategy ?? childDragAnchorStrategy,
+                onDragStarted: () {
+                  dismissOverlay?.call();
+                  selectEvent(context);
+                },
+                maxSimultaneousDrags: 1,
+                child: isDragging && tileWhenDragging != null ? tileWhenDragging : tile,
+              )
+            : Draggable<Reschedule<T>>(
+                data: rescheduleEvent,
+                feedback: feedback,
+                childWhenDragging: tileWhenDragging,
+                dragAnchorStrategy: dragAnchorStrategy ?? childDragAnchorStrategy,
+                onDragStarted: () {
+                  dismissOverlay?.call();
+                  selectEvent(context);
+                },
+                child: isDragging && tileWhenDragging != null ? tileWhenDragging : tile,
+              ));
   }
 }
 

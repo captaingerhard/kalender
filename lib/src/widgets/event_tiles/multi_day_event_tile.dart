@@ -68,18 +68,19 @@ class MultiDayEventTile<T extends Object?> extends EventTile<T> {
     return Stack(
       fit: StackFit.expand,
       children: [
-        GestureDetector(
-          behavior: !event.interaction.allowTap ? HitTestBehavior.translucent : null,
-          onTap: onEventTapped != null && event.interaction.allowTap
-              ? () {
-                  // Find the global position and size of the tile.
-                  final renderObject = context.findRenderObject()! as RenderBox;
-                  onEventTapped!.call(event, renderObject);
-                  onEventTappedWithDetail?.call(event, renderObject, MultiDayDetail(dateTimeRange));
-                }
-              : null,
-          child: canReschedule ? reschedule : tile,
-        ),
+        event.interaction.allowTap
+            ? GestureDetector(
+                onTap: onEventTapped != null && event.interaction.allowTap
+                    ? () {
+                        // Find the global position and size of the tile.
+                        final renderObject = context.findRenderObject()! as RenderBox;
+                        onEventTapped!.call(event, renderObject);
+                        onEventTappedWithDetail?.call(event, renderObject, MultiDayDetail(dateTimeRange));
+                      }
+                    : null,
+                child: canReschedule ? reschedule : tile,
+              )
+            : (canReschedule ? reschedule : tile),
         Positioned.fill(child: resizeHandles),
       ],
     );
