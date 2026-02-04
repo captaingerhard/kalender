@@ -30,7 +30,7 @@ class MultiDayOverlayEventTile<T extends Object?> extends EventTile<T> {
     );
 
     return GestureDetector(
-      onTap: onEventTapped != null
+      onTap: onEventTapped != null && event.interaction.allowTap
           ? () {
               // Find the global position and size of the tile.
               final renderObject = context.findRenderObject()! as RenderBox;

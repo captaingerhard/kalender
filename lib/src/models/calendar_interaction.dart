@@ -148,6 +148,8 @@ class EventInteraction {
   /// If set to `true`, users can reschedule the event by dragging it to a different time slot.
   final bool allowRescheduling;
 
+  final bool allowTap;
+
   /// Creates a new [EventInteraction] instance with the specified settings.
   ///
   /// All parameters are optional and default to `true`, allowing all interactions.
@@ -155,6 +157,7 @@ class EventInteraction {
     this.allowStartResize = true,
     this.allowEndResize = true,
     this.allowRescheduling = true,
+    this.allowTap = true,
   });
 
   /// Creates an [EventInteraction] from the now deprecated [canModify] property.
@@ -164,7 +167,8 @@ class EventInteraction {
   EventInteraction.fromCanModify(bool canModify)
       : allowStartResize = canModify,
         allowEndResize = canModify,
-        allowRescheduling = canModify;
+        allowRescheduling = canModify,
+        allowTap = true;
 
   /// Creates an [EventInteraction] that disables all interactions.
   ///
@@ -172,7 +176,8 @@ class EventInteraction {
   EventInteraction.allowNone()
       : allowStartResize = false,
         allowEndResize = false,
-        allowRescheduling = false;
+        allowRescheduling = false,
+        allowTap = false;
 
   /// Creates an [EventInteraction] that enables all interactions.
   ///
@@ -180,7 +185,8 @@ class EventInteraction {
   EventInteraction.allowAll()
       : allowStartResize = true,
         allowEndResize = true,
-        allowRescheduling = true;
+        allowRescheduling = true,
+        allowTap = true;
 
   @override
   operator ==(Object other) {
