@@ -73,19 +73,12 @@ void main() {
       // Verify that the events are laid out correctly
       expect(find.byKey(getKey(1)), findsOneWidget);
       expect(find.byKey(getKey(2)), findsOneWidget);
-      // This should be hidden as it exceeds the max number of vertical events.
-      expect(find.byKey(getKey(3)), findsNothing);
+      // Single-day hidden events are now shown directly instead of "+1 more" button
+      expect(find.byKey(getKey(3)), findsOneWidget);
 
+      // No buttons expected since the single hidden event is shown directly
       final buttonFinder = find.byType(MultiDayPortalOverlayButton);
-      final numberOfButtons = tester.widgetList(buttonFinder).length;
-      // Verify that the number of buttons is correct.
-      expect(numberOfButtons, 1);
-
-      // Verify that the button contains the correct text.
-      expect(
-        (find.byKey(MultiDayPortalOverlayButton.textKey).evaluate().single.widget as Text).data!.contains('1'),
-        isTrue,
-      );
+      expect(buttonFinder, findsNothing);
     });
 
     testWidgets('Multiple events', (tester) async {
@@ -355,17 +348,12 @@ void main() {
       // Verify that the events are laid out correctly
       expect(find.byKey(getKey(1)), findsOneWidget);
       expect(find.byKey(getKey(2)), findsOneWidget);
-      expect(find.byKey(getKey(4)), findsNothing);
+      // Single-day hidden events are now shown directly instead of "+1 more" button
+      expect(find.byKey(getKey(4)), findsOneWidget);
 
+      // No buttons expected since the single hidden event is shown directly
       final buttonFinder = find.byType(MultiDayPortalOverlayButton);
-      expect(buttonFinder, findsOneWidget);
-
-      final buttonTextFinder = find.byKey(MultiDayPortalOverlayButton.textKey);
-      buttonTextFinder.evaluate().forEach((element) {
-        final text = (element.widget as Text).data;
-        expect(text, isNotNull, reason: 'Button text should not be null');
-        expect(text!.contains('1'), isTrue, reason: 'Button text should contain the number "1" but found: "$text"');
-      });
+      expect(buttonFinder, findsNothing);
 
       // Get positions of each event
       final pos1 = tester.getTopLeft(find.byKey(getKey(1)));
@@ -462,17 +450,12 @@ void main() {
       expect(find.byKey(getKey(1)), findsOneWidget);
       expect(find.byKey(getKey(2)), findsOneWidget);
       expect(find.byKey(getKey(3)), findsOneWidget);
-      expect(find.byKey(getKey(4)), findsNothing);
+      // Single-day hidden events are now shown directly instead of "+1 more" button
+      expect(find.byKey(getKey(4)), findsOneWidget);
 
+      // No buttons expected since the single hidden event is shown directly
       final buttonFinder = find.byType(MultiDayPortalOverlayButton);
-      expect(buttonFinder, findsOneWidget);
-
-      final buttonTextFinder = find.byKey(MultiDayPortalOverlayButton.textKey);
-      buttonTextFinder.evaluate().forEach((element) {
-        final text = (element.widget as Text).data;
-        expect(text, isNotNull, reason: 'Button text should not be null');
-        expect(text!.contains('1'), isTrue, reason: 'Button text should contain the number "1" but found: "$text"');
-      });
+      expect(buttonFinder, findsNothing);
 
       // Get positions of each event
       final pos1 = tester.getTopLeft(find.byKey(getKey(1)));

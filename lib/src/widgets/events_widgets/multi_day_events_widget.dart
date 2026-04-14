@@ -290,6 +290,37 @@ class _MultiDayEventLayoutWidgetState<T extends Object?> extends State<MultiDayE
                     overlayTileBuilder: _overlayEventTileBuilder,
                   );
 
+              // If only 1 event is hidden, show it directly instead of "+1 more" button
+              // (only for single-day events to avoid rendering multi-day events multiple times)
+              if (numberOfHiddenRows == 1) {
+                // Find the hidden event (the one with row >= maxNumberOfRows)
+                final hiddenEventInfo = _frame.layoutInfo.firstWhere(
+                  (info) => info.columns.contains(column) && info.row >= maxNumberOfRows,
+                );
+                final hiddenEvent = eventsForColumn.firstWhere(
+                  (event) => event.id == hiddenEventInfo.id,
+                );
+
+                // Only show directly if it's a single-column (single-day) event
+                if (hiddenEventInfo.columns.length == 1) {
+                  return Expanded(
+                    child: SizedBox(
+                      height: widget.tileHeight,
+                      child: Padding(
+                        padding: widget.eventPadding ?? const EdgeInsets.all(0),
+                        child: MultiDayEventTile<T>(
+                          event: hiddenEvent,
+                          callbacks: context.callbacks<T>(),
+                          tileComponents: context.tileComponents<T>(),
+                          interaction: context.interaction,
+                          dateTimeRange: widget.visibleDateTimeRange,
+                        ),
+                      ),
+                    ),
+                  );
+                }
+              }
+
               return Expanded(
                 child: row >= maxNumberOfRows ? overlayPortal : const SizedBox.shrink(),
               );
