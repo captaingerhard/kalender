@@ -32,7 +32,7 @@ class ScheduleEventTile<T extends Object?> extends EventTile<T> {
     );
 
     return GestureDetector(
-      behavior: !event.interaction.allowTap ? HitTestBehavior.translucent : null,
+      behavior: HitTestBehavior.translucent,
       onTap: onEventTapped != null && event.interaction.allowTap
           ? () {
               // Find the global position and size of the tile.

@@ -67,7 +67,7 @@ class DayEventTile<T extends Object?> extends EventTile<T> {
       fit: StackFit.expand,
       children: [
         GestureDetector(
-          behavior: !event.interaction.allowTap ? HitTestBehavior.translucent : null,
+          behavior: HitTestBehavior.translucent,
           onTap: onEventTapped != null && event.interaction.allowTap
               ? () {
                   // Find the global position and size of the tile.
