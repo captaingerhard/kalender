@@ -26,6 +26,27 @@ typedef PrototypeTimeLineBuilder = Widget Function(
   TimelineStyle? style,
 );
 
+/// Enum to specify which time indicators should be shown during drag.
+enum TimeIndicatorVisibility {
+  /// Show both start and end indicators.
+  both,
+
+  /// Show only the start indicator.
+  startOnly,
+
+  /// Show only the end indicator.
+  endOnly,
+
+  /// Hide both indicators.
+  none,
+}
+
+/// Callback to determine which time indicators to show based on the event.
+/// Returns [TimeIndicatorVisibility] to control which indicators are displayed.
+typedef TimeIndicatorVisibilityCallback = TimeIndicatorVisibility Function(
+  CalendarEvent<dynamic> event,
+);
+
 /// The style of the [TimeLine] widget.
 class TimelineStyle {
   /// The style of the text.
@@ -46,6 +67,10 @@ class TimelineStyle {
   /// The decoration for the event end time.
   final Decoration? endDecoration;
 
+  /// Callback to determine which time indicators to show based on the event.
+  /// If null, both indicators are shown (default behavior).
+  final TimeIndicatorVisibilityCallback? indicatorVisibilityCallback;
+
   const TimelineStyle({
     this.textStyle,
     this.textDirection,
@@ -53,6 +78,7 @@ class TimelineStyle {
     this.textPadding,
     this.startDecoration,
     this.endDecoration,
+    this.indicatorVisibilityCallback,
   });
 }
 
@@ -239,22 +265,32 @@ class TimeLine extends StatelessWidget with TimeLineUtils {
               borderRadius: BorderRadius.circular(8),
             );
 
+            // Determine which indicators to show based on the callback
+            final visibility =
+                style?.indicatorVisibilityCallback?.call(eventBeingDragged) ?? TimeIndicatorVisibility.both;
+
+            final showStart =
+                visibility == TimeIndicatorVisibility.both || visibility == TimeIndicatorVisibility.startOnly;
+            final showEnd = visibility == TimeIndicatorVisibility.both || visibility == TimeIndicatorVisibility.endOnly;
+
             return Stack(
               children: [
-                Positioned(
-                  top: startTop,
-                  child: Container(
-                    decoration: style?.startDecoration ?? decoration,
-                    child: Center(child: Text(startText)),
+                if (showStart)
+                  Positioned(
+                    top: startTop,
+                    child: Container(
+                      decoration: style?.startDecoration ?? decoration,
+                      child: Center(child: Text(startText)),
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: endTop,
-                  child: Container(
-                    decoration: style?.endDecoration ?? decoration,
-                    child: Center(child: Text(endText)),
+                if (showEnd)
+                  Positioned(
+                    top: endTop,
+                    child: Container(
+                      decoration: style?.endDecoration ?? decoration,
+                      child: Center(child: Text(endText)),
+                    ),
                   ),
-                ),
               ],
             );
           },
