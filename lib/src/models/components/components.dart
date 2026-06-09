@@ -95,3 +95,7 @@ typedef HorizontalTriggerWidgetBuilder = Widget Function(double pageWidth);
 ///
 /// The [viewPortHeight] is the height of the page.
 typedef VerticalTriggerWidgetBuilder = Widget Function(double viewPortHeight);
+
+/// A builder that returns a background color for a specific date.
+/// Return null for no background.
+typedef DayBackgroundBuilder = Color? Function(DateTime date);

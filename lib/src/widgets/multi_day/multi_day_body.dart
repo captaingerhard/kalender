@@ -219,11 +219,31 @@ class _MultiDayPageState<T extends Object?> extends State<MultiDayPage<T>> {
       itemBuilder: (context, index) {
         // Calculate the visible date time range for the current page index.
         final visibleRange = _pageNavigation.dateTimeRangeFromIndex(index);
+        final bodyComponents =
+            context.components<T>()?.multiDayComponents?.bodyComponents ?? MultiDayBodyComponents<T>();
 
         return Stack(
           key: MultiDayPage.contentKey,
           clipBehavior: Clip.none,
           children: [
+            // Day background colors for time grid columns
+            if (bodyComponents.dayBackgroundBuilder != null)
+              Positioned.fill(
+                child: Row(
+                  children: List.generate(
+                    _isFreeScroll ? visibleRange.dates().length : _numberOfDays,
+                    (i) {
+                      final date = visibleRange.start.addDays(i);
+                      final color = bodyComponents.dayBackgroundBuilder!(date.asLocal);
+                      return Expanded(
+                        child: color != null
+                            ? ColoredBox(color: color, child: const SizedBox.expand())
+                            : const SizedBox.expand(),
+                      );
+                    },
+                  ),
+                ),
+              ),
             // HourLines are positioned behind the events.
             Positioned.fill(
               child: Row(

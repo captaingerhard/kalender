@@ -38,6 +38,9 @@ class MultiDayHeaderComponents<T> {
   /// A group of builders for the overlay widgets.
   final OverlayBuilders<T>? overlayBuilders;
 
+  /// Returns a background color for the all-day/multi-day header column of the given date.
+  final DayBackgroundBuilder? dayBackgroundBuilder;
+
   /// Creates overrides for the default components used by the [MultiDayHeader].
   const MultiDayHeaderComponents({
     this.dayHeaderBuilder = DayHeader.builder,
@@ -45,6 +48,7 @@ class MultiDayHeaderComponents<T> {
     this.leftTriggerBuilder,
     this.rightTriggerBuilder,
     this.overlayBuilders,
+    this.dayBackgroundBuilder,
   });
 }
 
@@ -83,6 +87,9 @@ class MultiDayBodyComponents<T> {
   /// A function that builds the bottom trigger widget.
   final VerticalTriggerWidgetBuilder? bottomTriggerBuilder;
 
+  /// Returns a background color for the body column of the given date.
+  final DayBackgroundBuilder? dayBackgroundBuilder;
+
   /// Creates overrides for the default components used by the [MultiDayBody].
   const MultiDayBodyComponents({
     this.hourLines = HourLines.builder,
@@ -94,5 +101,6 @@ class MultiDayBodyComponents<T> {
     this.rightTriggerBuilder,
     this.topTriggerBuilder,
     this.bottomTriggerBuilder,
+    this.dayBackgroundBuilder,
   });
 }

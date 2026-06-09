@@ -33,7 +33,7 @@ class MonthBody<T extends Object?> extends StatelessWidget {
 
     final viewController = calendarController.viewController as MonthViewController<T>;
     final viewConfiguration = viewController.viewConfiguration;
-    final bodyConfiguration = this.configuration ?? MultiDayHeaderConfiguration();
+    final bodyConfiguration = configuration ?? MultiDayHeaderConfiguration();
     final pageNavigation = viewConfiguration.pageNavigationFunctions;
     final pageTriggerConfiguration = bodyConfiguration.pageTriggerConfiguration;
     final tileHeight = bodyConfiguration.tileHeight;
@@ -97,6 +97,20 @@ class MonthBody<T extends Object?> extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
+                      if (components.dayBackgroundBuilder != null)
+                        Positioned.fill(
+                          child: Row(
+                            children: List.generate(7, (i) {
+                              final date = visibleDateTimeRange.start.addDays(i);
+                              final color = components.dayBackgroundBuilder!(date);
+                              return Expanded(
+                                child: color != null
+                                    ? ColoredBox(color: color, child: const SizedBox.expand())
+                                    : const SizedBox.expand(),
+                              );
+                            }),
+                          ),
+                        ),
                       Positioned.fill(child: draggable),
                       Positioned(
                         top: 0,

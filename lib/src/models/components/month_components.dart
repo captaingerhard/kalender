@@ -35,6 +35,9 @@ class MonthBodyComponents<T extends Object?> {
   /// A group of builders for the overlay widgets.
   final OverlayBuilders<T>? overlayBuilders;
 
+  /// Returns a background color for the full month cell of the given date.
+  final DayBackgroundBuilder? dayBackgroundBuilder;
+
   /// Creates overrides for the default components used by the [MonthBody].
   const MonthBodyComponents({
     this.monthGridBuilder = MonthGrid.builder,
@@ -42,6 +45,7 @@ class MonthBodyComponents<T extends Object?> {
     this.leftTriggerBuilder,
     this.rightTriggerBuilder,
     this.overlayBuilders,
+    this.dayBackgroundBuilder,
   });
 }
 

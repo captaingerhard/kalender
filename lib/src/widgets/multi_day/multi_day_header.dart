@@ -30,7 +30,7 @@ class MultiDayHeader<T extends Object?> extends StatelessWidget {
 
     final viewController = calendarController.viewController as MultiDayViewController<T>;
     final viewConfiguration = viewController.viewConfiguration;
-    final headerConfiguration = this.configuration ?? MultiDayHeaderConfiguration<T>();
+    final headerConfiguration = configuration ?? MultiDayHeaderConfiguration<T>();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -119,8 +119,20 @@ class _SingleDayHeader<T extends Object?> extends StatelessWidget {
               rightPageTrigger: headerComponents.rightTriggerBuilder,
             );
 
+            final color = headerComponents.dayBackgroundBuilder != null
+                ? headerComponents.dayBackgroundBuilder!(visibleRange.start.asLocal)
+                : null;
+
             return Stack(
               children: [
+                // Day background colors for all-day event area
+                if (headerComponents.dayBackgroundBuilder != null)
+                  Positioned.fill(
+                    child: color != null
+                        ? ColoredBox(color: color, child: const SizedBox.expand())
+                        : const SizedBox.expand(),
+                  ),
+
                 Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
                 ConstrainedBox(constraints: constraints, child: multiDayEvents),
                 Positioned.fill(child: multiDayDragTarget),
@@ -210,6 +222,21 @@ class _MultiDayHeader<T extends Object?> extends StatelessWidget {
                 if (configuration.showTiles)
                   Stack(
                     children: [
+                      // Day background colors for all-day event area
+                      if (headerComponents.dayBackgroundBuilder != null)
+                        Positioned.fill(
+                          child: Row(
+                            children: visibleDates.map((date) {
+                              final color = headerComponents.dayBackgroundBuilder!(date.asLocal);
+                              return SizedBox(
+                                width: dayWidth,
+                                child: color != null
+                                    ? ColoredBox(color: color, child: const SizedBox.expand())
+                                    : const SizedBox.expand(),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
                       ConstrainedBox(constraints: constraints, child: multiDayEvents),
                       Positioned.fill(child: multiDayDragTarget),
@@ -302,6 +329,21 @@ class _FreeScrollHeader<T extends Object?> extends StatelessWidget {
                 if (configuration.showTiles)
                   Stack(
                     children: [
+                      // Day background colors for all-day event area
+                      if (headerComponents.dayBackgroundBuilder != null)
+                        Positioned.fill(
+                          child: Row(
+                            children: visibleDates.map((date) {
+                              final color = headerComponents.dayBackgroundBuilder!(date.asLocal);
+                              return SizedBox(
+                                width: dayWidth,
+                                child: color != null
+                                    ? ColoredBox(color: color, child: const SizedBox.expand())
+                                    : const SizedBox.expand(),
+                              );
+                            }).toList(),
+                          ),
+                        ),
                       Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
                       ConstrainedBox(constraints: constraintsBox, child: multiDayEvents),
                       Positioned.fill(child: multiDayDragTarget),
