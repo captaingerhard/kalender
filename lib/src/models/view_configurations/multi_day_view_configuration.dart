@@ -373,6 +373,11 @@ class MultiDayHeaderConfiguration<T extends Object?> {
   /// The padding used around events.
   final EdgeInsets eventPadding;
 
+  /// Empty tappable space reserved below the all-day event tiles in the
+  /// header, so new all-day events can still be created on days that
+  /// already have all-day events. Defaults to one [tileHeight].
+  final double bottomPadding;
+
   /// The layout strategy used to layout events.
   @Deprecated('''
 This method is deprecated and will be removed in a future release. 
@@ -388,9 +393,11 @@ Please use the `generateFrame` method instead.
     this.maximumNumberOfVerticalEvents,
     this.eventLayoutStrategy,
     this.eventPadding = kDefaultMultiDayEventPadding,
+    double? bottomPadding,
     PageTriggerConfiguration? pageTriggerConfiguration,
     ScrollTriggerConfiguration? scrollTriggerConfiguration,
-  }) : pageTriggerConfiguration = pageTriggerConfiguration ?? PageTriggerConfiguration();
+  })  : bottomPadding = bottomPadding ?? tileHeight,
+        pageTriggerConfiguration = pageTriggerConfiguration ?? PageTriggerConfiguration();
 
   /// Creates a copy of this [MultiDayHeaderConfiguration] with the given fields replaced by the new values.
   MultiDayHeaderConfiguration<T> copyWith({
@@ -400,6 +407,7 @@ Please use the `generateFrame` method instead.
     GenerateMultiDayLayoutFrame<T>? generateMultiDayLayoutFrame,
     int? maximumNumberOfVerticalEvents,
     EdgeInsets? eventPadding,
+    double? bottomPadding,
   }) {
     return MultiDayHeaderConfiguration(
       showTiles: showTiles ?? this.showTiles,
@@ -408,6 +416,7 @@ Please use the `generateFrame` method instead.
       generateMultiDayLayoutFrame: generateMultiDayLayoutFrame ?? this.generateMultiDayLayoutFrame,
       maximumNumberOfVerticalEvents: maximumNumberOfVerticalEvents ?? this.maximumNumberOfVerticalEvents,
       eventPadding: eventPadding ?? this.eventPadding,
+      bottomPadding: bottomPadding ?? this.bottomPadding,
     );
   }
 
@@ -421,7 +430,8 @@ Please use the `generateFrame` method instead.
         other.pageTriggerConfiguration == pageTriggerConfiguration &&
         other.generateMultiDayLayoutFrame == generateMultiDayLayoutFrame &&
         other.maximumNumberOfVerticalEvents == maximumNumberOfVerticalEvents &&
-        other.eventPadding == eventPadding;
+        other.eventPadding == eventPadding &&
+        other.bottomPadding == bottomPadding;
   }
 
   @override
@@ -433,6 +443,7 @@ Please use the `generateFrame` method instead.
       generateMultiDayLayoutFrame,
       maximumNumberOfVerticalEvents,
       eventPadding,
+      bottomPadding,
     );
   }
 }

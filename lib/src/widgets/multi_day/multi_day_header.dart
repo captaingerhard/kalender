@@ -134,7 +134,13 @@ class _SingleDayHeader<T extends Object?> extends StatelessWidget {
                   ),
 
                 Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
-                ConstrainedBox(constraints: constraints, child: multiDayEvents),
+                ConstrainedBox(
+                  constraints: constraints,
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: configuration.bottomPadding),
+                    child: multiDayEvents,
+                  ),
+                ),
                 Positioned.fill(child: multiDayDragTarget),
               ],
             );
@@ -238,7 +244,13 @@ class _MultiDayHeader<T extends Object?> extends StatelessWidget {
                           ),
                         ),
                       Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
-                      ConstrainedBox(constraints: constraints, child: multiDayEvents),
+                      ConstrainedBox(
+                        constraints: constraints,
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: configuration.bottomPadding),
+                          child: multiDayEvents,
+                        ),
+                      ),
                       Positioned.fill(child: multiDayDragTarget),
                     ],
                   ),
@@ -345,7 +357,13 @@ class _FreeScrollHeader<T extends Object?> extends StatelessWidget {
                           ),
                         ),
                       Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleRange)),
-                      ConstrainedBox(constraints: constraintsBox, child: multiDayEvents),
+                      ConstrainedBox(
+                        constraints: constraintsBox,
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: configuration.bottomPadding),
+                          child: multiDayEvents,
+                        ),
+                      ),
                       Positioned.fill(child: multiDayDragTarget),
                     ],
                   ),
