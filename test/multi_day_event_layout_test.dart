@@ -482,5 +482,166 @@ void main() {
         }
       }
     });
+
+    testWidgets('Row spanning tile is positioned and sized by rowSpan', (tester) async {
+      final events = [
+        CalendarEvent<int>(
+          dateTimeRange: DateTimeRange(start: start, end: start.copyWith(day: start.day + 1)),
+          data: 1,
+        ),
+      ];
+      eventsController.addEvents(events);
+
+      const tileHeight = 50.0;
+
+      // A custom frame generator that places the event at row 1 and spans 3 rows.
+      MultiDayLayoutFrame<int> spanningFrame({
+        required DateTimeRange visibleDateTimeRange,
+        required List<CalendarEvent<int>> events,
+        required TextDirection textDirection,
+      }) {
+        return MultiDayLayoutFrame<int>(
+          dateTimeRange: visibleDateTimeRange,
+          events: events,
+          layoutInfo: [
+            EventLayoutInformation(id: events.first.id, row: 1, columns: const [0], rowSpan: 3),
+          ],
+          totalNumberOfRows: 4,
+          columnRowMap: const {0: 3},
+        );
+      }
+
+      await tester.pumpWidget(
+        wrapWithMaterialApp(
+          TestProvider(
+            calendarController: controller,
+            eventsController: eventsController,
+            tileComponents: tileComponents,
+            child: MultiDayEventLayoutWidget<int>(
+              events: eventsController.events.toList(),
+              eventsController: eventsController,
+              visibleDateTimeRange: visibleRange,
+              showAllEvents: true,
+              tileHeight: tileHeight,
+              maxNumberOfVerticalEvents: null,
+              generateMultiDayLayoutFrame: spanningFrame,
+              eventPadding: const EdgeInsets.all(0),
+              textDirection: TextDirection.ltr,
+              multiDayOverlayBuilders: null,
+              multiDayOverlayStyles: null,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final tileFinder = find.byKey(getKey(1));
+      expect(tileFinder, findsOneWidget);
+
+      // Positioned at row 1 -> tileHeight.
+      final position = tester.getTopLeft(tileFinder);
+      final layoutPosition = tester.getTopLeft(find.byType(CustomMultiChildLayout).last);
+      expect(position.dy - layoutPosition.dy, tileHeight);
+
+      // Sized to 3 * tileHeight.
+      final size = tester.getSize(tileFinder);
+      expect(size.height, 3 * tileHeight);
+    });
+
+    testWidgets('Row spanning tile is clamped when numberOfRows is limited', (tester) async {
+      final events = [
+        CalendarEvent<int>(
+          dateTimeRange: DateTimeRange(start: start, end: start.copyWith(day: start.day + 1)),
+          data: 1,
+        ),
+      ];
+      eventsController.addEvents(events);
+
+      const tileHeight = 50.0;
+
+      // The event spans 3 rows starting at row 0, but only 2 rows are available.
+      MultiDayLayoutFrame<int> spanningFrame({
+        required DateTimeRange visibleDateTimeRange,
+        required List<CalendarEvent<int>> events,
+        required TextDirection textDirection,
+      }) {
+        return MultiDayLayoutFrame<int>(
+          dateTimeRange: visibleDateTimeRange,
+          events: events,
+          layoutInfo: [
+            EventLayoutInformation(id: events.first.id, row: 0, columns: const [0], rowSpan: 3),
+          ],
+          totalNumberOfRows: 2,
+          columnRowMap: const {0: 1},
+        );
+      }
+
+      await tester.pumpWidget(
+        wrapWithMaterialApp(
+          TestProvider(
+            calendarController: controller,
+            eventsController: eventsController,
+            tileComponents: tileComponents,
+            child: MultiDayEventLayoutWidget<int>(
+              events: eventsController.events.toList(),
+              eventsController: eventsController,
+              visibleDateTimeRange: visibleRange,
+              showAllEvents: true,
+              tileHeight: tileHeight,
+              maxNumberOfVerticalEvents: null,
+              generateMultiDayLayoutFrame: spanningFrame,
+              eventPadding: const EdgeInsets.all(0),
+              textDirection: TextDirection.ltr,
+              multiDayOverlayBuilders: null,
+              multiDayOverlayStyles: null,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final tileFinder = find.byKey(getKey(1));
+      expect(tileFinder, findsOneWidget);
+
+      // Clamped to numberOfRows - row = 2 - 0 = 2 rows.
+      final size = tester.getSize(tileFinder);
+      expect(size.height, 2 * tileHeight);
+    });
+  });
+
+  group('EventLayoutInformation rowSpan', () {
+    test('Defaults to 1', () {
+      final info = EventLayoutInformation(id: 1, row: 0, columns: const [0]);
+      expect(info.rowSpan, 1);
+    });
+
+    test('preliminary sets rowSpan to 1', () {
+      final info = EventLayoutInformation.preliminary(id: 1, columns: const [0]);
+      expect(info.rowSpan, 1);
+    });
+
+    test('copyWith updates rowSpan', () {
+      final info = EventLayoutInformation(id: 1, row: 0, columns: const [0]);
+      final copy = info.copyWith(rowSpan: 3);
+      expect(copy.rowSpan, 3);
+      // Other fields are preserved.
+      expect(copy.id, info.id);
+      expect(copy.row, info.row);
+      expect(copy.columns, info.columns);
+    });
+
+    test('Asserts rowSpan is greater than zero', () {
+      expect(
+        () => EventLayoutInformation(id: 1, row: 0, columns: const [0], rowSpan: 0),
+        throwsAssertionError,
+      );
+    });
+
+    test('toString includes rowSpan', () {
+      final info = EventLayoutInformation(id: 1, row: 2, columns: const [0], rowSpan: 3);
+      expect(info.toString(), contains('rowSpan: 3'));
+    });
   });
 }

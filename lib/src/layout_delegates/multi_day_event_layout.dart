@@ -257,6 +257,17 @@ class EventLayoutInformation {
   /// The columns that the event should be laid out on.
   final List<int> columns;
 
+  /// The number of rows that the event should span vertically.
+  ///
+  /// Defaults to `1`, which means the event occupies a single row.
+  ///
+  /// Custom [GenerateMultiDayLayoutFrame]s that use a [rowSpan] greater than `1`
+  /// are responsible for:
+  /// * Choosing a non-overlapping [row] and [rowSpan] for each event.
+  /// * Setting [MultiDayLayoutFrame.totalNumberOfRows] large enough to contain
+  ///   `row + rowSpan`.
+  final int rowSpan;
+
   /// The starting column of the event.
   int get start => columns.first;
 
@@ -267,7 +278,9 @@ class EventLayoutInformation {
     required this.id,
     required this.row,
     required this.columns,
-  }) : assert(columns.isNotEmpty, 'Columns cannot be empty');
+    this.rowSpan = 1,
+  })  : assert(columns.isNotEmpty, 'Columns cannot be empty'),
+        assert(rowSpan > 0, 'rowSpan must be greater than zero');
 
   factory EventLayoutInformation.preliminary({
     required int id,
@@ -277,6 +290,7 @@ class EventLayoutInformation {
       id: id,
       row: 0,
       columns: columns,
+      rowSpan: 1,
     );
   }
 
@@ -284,11 +298,13 @@ class EventLayoutInformation {
   EventLayoutInformation copyWith({
     int? row,
     List<int>? columns,
+    int? rowSpan,
   }) {
     return EventLayoutInformation(
       id: id,
       row: row ?? this.row,
       columns: columns ?? this.columns,
+      rowSpan: rowSpan ?? this.rowSpan,
     );
   }
 
@@ -306,7 +322,7 @@ class EventLayoutInformation {
 
   @override
   String toString() {
-    return 'EventLayoutInfo(id: $id, row: $row, start: $start, end: $end)';
+    return 'EventLayoutInfo(id: $id, row: $row, rowSpan: $rowSpan, start: $start, end: $end)';
   }
 }
 
@@ -367,7 +383,14 @@ class MultiDayLayout extends MultiChildLayoutDelegate {
       // Calculate the width of the child based on the number of columns and day width.
       final width = information.columns.length * dayWidth;
 
-      layoutChild(information.id, BoxConstraints.tightFor(width: width, height: tileHeight));
+      // Determine the effective row span, clamped so that a spanning child never
+      // extends beyond the available rows when [numberOfRows] limits the layout.
+      final effectiveRowSpan = min(information.rowSpan, numberOfRows - information.row);
+
+      // Calculate the height of the child based on the (clamped) row span.
+      final height = effectiveRowSpan * tileHeight;
+
+      layoutChild(information.id, BoxConstraints.tightFor(width: width, height: height));
       positionChild(information.id, Offset(dx, dy));
     }
   }
