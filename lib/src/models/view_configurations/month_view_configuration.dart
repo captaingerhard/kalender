@@ -77,10 +77,47 @@ Please use the `generateFrame` method in the `MonthBodyConfiguration` configurat
 }
 
 class MonthBodyConfiguration<T extends Object?> extends MultiDayHeaderConfiguration<T> {
+  /// Whether the height of each week grows to fit its events instead of
+  /// dividing the available height equally between the weeks.
+  ///
+  /// When `true` the [MonthBody] becomes vertically scrollable: if the combined
+  /// height of all the weeks exceeds the available space the body can be
+  /// scrolled instead of clipping/compressing the content.
+  ///
+  /// Defaults to `false` which keeps the original fixed-height grid behaviour.
+  final bool dynamicRowHeight;
+
+  /// The maximum number of event rows that are displayed for a day before an
+  /// overlay ("+ X more") is shown.
+  ///
+  /// This is only used when [dynamicRowHeight] is `true`.
+  ///
+  /// * If `null` every event is rendered and the week grows to fit all of them
+  ///   (pure dynamic mode).
+  /// * If set the week grows up to this many event rows and any additional
+  ///   events are collapsed into the overlay (mixed mode).
+  final int? maxEventsBeforeOverlay;
+
+  /// The minimum number of event rows that are reserved for every week when
+  /// [dynamicRowHeight] is `true`.
+  ///
+  /// This ensures weeks with few or no events keep a usable, tappable height.
+  final int minEventRows;
+
   MonthBodyConfiguration({
     super.generateMultiDayLayoutFrame,
     super.pageTriggerConfiguration,
     super.scrollTriggerConfiguration,
     super.tileHeight,
-  }) : super(showTiles: true, maximumNumberOfVerticalEvents: null);
+    super.eventPadding,
+    super.bottomPadding,
+    this.dynamicRowHeight = false,
+    this.maxEventsBeforeOverlay,
+    this.minEventRows = 2,
+  })  : assert(
+          maxEventsBeforeOverlay == null || maxEventsBeforeOverlay > 0,
+          'maxEventsBeforeOverlay must be greater than 0',
+        ),
+        assert(minEventRows >= 0, 'minEventRows must be greater than or equal to 0'),
+        super(showTiles: true, maximumNumberOfVerticalEvents: null);
 }

@@ -27,7 +27,7 @@ class MonthBody<T extends Object?> extends StatelessWidget {
       'The CalendarController\'s $ViewController<$T> needs to be a $MonthViewController<$T>',
     );
 
-    if (configuration is MonthBodyConfiguration<T>) {
+    if (configuration != null && configuration is! MonthBodyConfiguration<T>) {
       debugPrint('Warning: The configuration provided to the $MonthBody is not a $MonthBodyConfiguration.');
     }
 
@@ -37,6 +37,12 @@ class MonthBody<T extends Object?> extends StatelessWidget {
     final pageNavigation = viewConfiguration.pageNavigationFunctions;
     final pageTriggerConfiguration = bodyConfiguration.pageTriggerConfiguration;
     final tileHeight = bodyConfiguration.tileHeight;
+
+    // Resolve the dynamic-height options (only available on [MonthBodyConfiguration]).
+    final monthBodyConfiguration = bodyConfiguration is MonthBodyConfiguration<T> ? bodyConfiguration : null;
+    final dynamicRowHeight = monthBodyConfiguration?.dynamicRowHeight ?? false;
+    final maxEventsBeforeOverlay = monthBodyConfiguration?.maxEventsBeforeOverlay;
+    final minEventRows = monthBodyConfiguration?.minEventRows ?? 2;
 
     final calendarComponents = provider.components;
     final styles = calendarComponents?.monthComponentStyles?.bodyStyles;
@@ -61,6 +67,105 @@ class MonthBody<T extends Object?> extends StatelessWidget {
           itemBuilder: (context, index) {
             final visibleRange = pageNavigation.dateTimeRangeFromIndex(index);
             final numberOfRows = pageNavigation.numberOfRowsForRange(visibleRange);
+
+            // Builds the multi-day events widget shared by both layout modes.
+            MultiDayEventWidget<T> eventsWidget(DateTimeRange visibleDateTimeRange, int? maxNumberOfRows) {
+              return MultiDayEventWidget<T>(
+                visibleDateTimeRange: visibleDateTimeRange,
+                tileHeight: tileHeight,
+                maxNumberOfRows: maxNumberOfRows,
+                showAllEvents: true,
+                generateMultiDayLayoutFrame: bodyConfiguration.generateMultiDayLayoutFrame,
+                overlayBuilders: components.overlayBuilders ?? calendarComponents?.overlayBuilders,
+                overlayStyles: styles?.overlayStyles ?? calendarComponents?.overlayStyles,
+                eventPadding: bodyConfiguration.eventPadding,
+              );
+            }
+
+            // Builds the header row with the day numbers for a week.
+            List<Widget> weekDayHeaders(DateTimeRange visibleDateTimeRange) {
+              return List.generate(7, (i) {
+                final date = visibleDateTimeRange.start.addDays(i);
+                final monthDayHeaderStyle = styles?.monthDayHeaderStyle;
+                return components.monthDayHeaderBuilder.call(date, monthDayHeaderStyle);
+              });
+            }
+
+            // Builds the optional day background layer for a week.
+            Widget? weekDayBackgrounds(DateTimeRange visibleDateTimeRange) {
+              if (components.dayBackgroundBuilder == null) return null;
+              return Row(
+                children: List.generate(7, (i) {
+                  final date = visibleDateTimeRange.start.addDays(i);
+                  final color = components.dayBackgroundBuilder!(date);
+                  return Expanded(
+                    child: color != null
+                        ? ColoredBox(color: color, child: const SizedBox.expand())
+                        : const SizedBox.expand(),
+                  );
+                }),
+              );
+            }
+
+            MultiDayDragTarget<T> weekDragTarget(DateTimeRange visibleDateTimeRange) {
+              return MultiDayDragTarget<T>(
+                pageTriggerSetup: pageTriggerConfiguration,
+                visibleDateTimeRange: visibleDateTimeRange,
+                dayWidth: dayWidth,
+                pageWidth: pageWidth,
+                tileHeight: tileHeight,
+                allowSingleDayEvents: true,
+                leftPageTrigger: components.leftTriggerBuilder,
+                rightPageTrigger: components.rightTriggerBuilder,
+              );
+            }
+
+            if (dynamicRowHeight) {
+              // Each week grows to fit its events and the whole body scrolls
+              // vertically when the combined height exceeds the viewport.
+              final weeks = List.generate(numberOfRows, (weekIndex) {
+                final visibleDateTimeRange = DateTimeRange(
+                  start: visibleRange.start.addDays(weekIndex * 7),
+                  end: visibleRange.start.addDays((weekIndex * 7) + 7),
+                );
+
+                final dayBackgrounds = weekDayBackgrounds(visibleDateTimeRange);
+                final minEventsHeight = minEventRows * tileHeight + bodyConfiguration.bottomPadding;
+
+                return Stack(
+                  children: [
+                    Positioned.fill(child: _dynamicWeekGrid(context, styles?.monthGridStyle, isFirst: weekIndex == 0)),
+                    if (dayBackgrounds != null) Positioned.fill(child: dayBackgrounds),
+                    Positioned.fill(child: MultiDayDraggable<T>(visibleDateTimeRange: visibleDateTimeRange)),
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: weekDayHeaders(visibleDateTimeRange),
+                        ),
+                        ConstrainedBox(
+                          constraints: BoxConstraints(minHeight: minEventsHeight),
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: eventsWidget(visibleDateTimeRange, maxEventsBeforeOverlay),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Positioned.fill(child: weekDragTarget(visibleDateTimeRange)),
+                  ],
+                );
+              });
+
+              return SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: pageHeight),
+                  child: Column(mainAxisSize: MainAxisSize.min, children: weeks),
+                ),
+              );
+            }
+
             final weekHeight = pageHeight / numberOfRows;
 
             final multiDayEvents = List.generate(
@@ -71,46 +176,16 @@ class MonthBody<T extends Object?> extends StatelessWidget {
                   end: visibleRange.start.addDays((index * 7) + 7),
                 );
 
-                final multiDayDragTarget = MultiDayDragTarget<T>(
-                  pageTriggerSetup: pageTriggerConfiguration,
-                  visibleDateTimeRange: visibleDateTimeRange,
-                  dayWidth: dayWidth,
-                  pageWidth: pageWidth,
-                  tileHeight: tileHeight,
-                  allowSingleDayEvents: true,
-                  leftPageTrigger: components.leftTriggerBuilder,
-                  rightPageTrigger: components.rightTriggerBuilder,
-                );
-
-                final draggable = MultiDayDraggable<T>(
-                  visibleDateTimeRange: visibleDateTimeRange,
-                );
-
-                final dates = List.generate(7, (index) {
-                  final date = visibleDateTimeRange.start.addDays(index);
-                  final monthDayHeaderStyle = styles?.monthDayHeaderStyle;
-                  final monthDayHeder = components.monthDayHeaderBuilder.call(date, monthDayHeaderStyle);
-                  return monthDayHeder;
-                });
+                final multiDayDragTarget = weekDragTarget(visibleDateTimeRange);
+                final draggable = MultiDayDraggable<T>(visibleDateTimeRange: visibleDateTimeRange);
+                final dayBackgrounds = weekDayBackgrounds(visibleDateTimeRange);
+                final dates = weekDayHeaders(visibleDateTimeRange);
 
                 return Expanded(
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      if (components.dayBackgroundBuilder != null)
-                        Positioned.fill(
-                          child: Row(
-                            children: List.generate(7, (i) {
-                              final date = visibleDateTimeRange.start.addDays(i);
-                              final color = components.dayBackgroundBuilder!(date);
-                              return Expanded(
-                                child: color != null
-                                    ? ColoredBox(color: color, child: const SizedBox.expand())
-                                    : const SizedBox.expand(),
-                              );
-                            }),
-                          ),
-                        ),
+                      if (dayBackgrounds != null) Positioned.fill(child: dayBackgrounds),
                       Positioned.fill(child: draggable),
                       Positioned(
                         top: 0,
@@ -125,16 +200,7 @@ class MonthBody<T extends Object?> extends StatelessWidget {
                                 builder: (context, constraints) {
                                   // Subtract 1 to account for the extra widget at the bottom.
                                   final maxNumberOfVerticalEvents = (constraints.maxHeight / tileHeight).floor() - 1;
-                                  return MultiDayEventWidget<T>(
-                                    visibleDateTimeRange: visibleDateTimeRange,
-                                    tileHeight: bodyConfiguration.tileHeight,
-                                    maxNumberOfRows: maxNumberOfVerticalEvents,
-                                    showAllEvents: true,
-                                    generateMultiDayLayoutFrame: configuration?.generateMultiDayLayoutFrame,
-                                    overlayBuilders: components.overlayBuilders ?? calendarComponents?.overlayBuilders,
-                                    overlayStyles: styles?.overlayStyles ?? calendarComponents?.overlayStyles,
-                                    eventPadding: bodyConfiguration.eventPadding,
-                                  );
+                                  return eventsWidget(visibleDateTimeRange, maxNumberOfVerticalEvents);
                                 },
                               ),
                             ),
@@ -164,6 +230,31 @@ class MonthBody<T extends Object?> extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  /// Builds the grid lines for a single week when [MonthBodyConfiguration.dynamicRowHeight] is enabled.
+  ///
+  /// Unlike the [MonthGrid] used in the fixed-height layout, the grid is drawn
+  /// per week so the horizontal lines always align with the (variable) week
+  /// heights and scroll together with the content.
+  Widget _dynamicWeekGrid(BuildContext context, MonthGridStyle? style, {required bool isFirst}) {
+    final thickness = style?.thickness ?? 0;
+    final color = style?.color ?? Theme.of(context).colorScheme.surfaceContainerHighest;
+
+    return Column(
+      children: [
+        if (isFirst) Divider(height: thickness, thickness: thickness, color: color),
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              for (int i = 0; i < 8; i++) VerticalDivider(width: thickness, thickness: thickness, color: color),
+            ],
+          ),
+        ),
+        Divider(height: thickness, thickness: thickness, color: color),
+      ],
     );
   }
 }
