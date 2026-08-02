@@ -197,9 +197,12 @@ class _MonthBodyState<T extends Object?> extends State<MonthBody<T>> {
                         ),
                         ConstrainedBox(
                           constraints: BoxConstraints(minHeight: minEventsHeight),
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: eventsWidget(visibleDateTimeRange, maxEventsBeforeOverlay),
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: bodyConfiguration.bottomPadding),
+                            child: Align(
+                              alignment: Alignment.topCenter,
+                              child: eventsWidget(visibleDateTimeRange, maxEventsBeforeOverlay),
+                            ),
                           ),
                         ),
                       ],
