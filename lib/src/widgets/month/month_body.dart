@@ -10,12 +10,53 @@ import 'package:kalender/src/widgets/events_widgets/multi_day_events_widget.dart
 /// The month body's content:
 ///   - Static content [MonthGrid].
 ///   - Dynamic content such as the [PageView] which renders [MultiDayEventWidget], [MultiDayDragTarget], [MultiDayDraggable].
-class MonthBody<T extends Object?> extends StatelessWidget {
+class MonthBody<T extends Object?> extends StatefulWidget {
   /// The [MultiDayBodyConfiguration] that will be used by the [MonthBody].
   final MultiDayHeaderConfiguration<T>? configuration;
 
   /// Creates a new [MonthBody].
   const MonthBody({super.key, this.configuration});
+
+  @override
+  State<MonthBody<T>> createState() => _MonthBodyState<T>();
+}
+
+class _MonthBodyState<T extends Object?> extends State<MonthBody<T>> {
+  /// The distance a pointer must travel before the scroll axis of the current
+  /// gesture is locked.
+  static const _axisLockThreshold = 12.0;
+
+  /// The axis the active gesture is locked to, or `null` while undetermined.
+  /// Prevents the vertical scroll view and horizontal [PageView] from fighting
+  /// over near-diagonal drags in the dynamic-height layout.
+  Axis? _lockedAxis;
+
+  int? _activePointer;
+  Offset _pointerDownPosition = Offset.zero;
+
+  void _handlePointerDown(PointerDownEvent event) {
+    if (_activePointer != null) return;
+    _activePointer = event.pointer;
+    _pointerDownPosition = event.position;
+  }
+
+  void _handlePointerMove(PointerMoveEvent event) {
+    if (event.pointer != _activePointer || _lockedAxis != null) return;
+    final delta = event.position - _pointerDownPosition;
+    if (delta.distance < _axisLockThreshold) return;
+    setState(() {
+      _lockedAxis = delta.dx.abs() >= delta.dy.abs() ? Axis.horizontal : Axis.vertical;
+    });
+  }
+
+  void _handlePointerUp(PointerUpEvent event) => _resetAxisLock(event.pointer);
+  void _handlePointerCancel(PointerCancelEvent event) => _resetAxisLock(event.pointer);
+
+  void _resetAxisLock(int pointer) {
+    if (pointer != _activePointer) return;
+    _activePointer = null;
+    if (_lockedAxis != null) setState(() => _lockedAxis = null);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,13 +68,13 @@ class MonthBody<T extends Object?> extends StatelessWidget {
       'The CalendarController\'s $ViewController<$T> needs to be a $MonthViewController<$T>',
     );
 
-    if (configuration != null && configuration is! MonthBodyConfiguration<T>) {
+    if (widget.configuration != null && widget.configuration is! MonthBodyConfiguration<T>) {
       debugPrint('Warning: The configuration provided to the $MonthBody is not a $MonthBodyConfiguration.');
     }
 
     final viewController = calendarController.viewController as MonthViewController<T>;
     final viewConfiguration = viewController.viewConfiguration;
-    final bodyConfiguration = configuration ?? MultiDayHeaderConfiguration();
+    final bodyConfiguration = widget.configuration ?? MultiDayHeaderConfiguration();
     final pageNavigation = viewConfiguration.pageNavigationFunctions;
     final pageTriggerConfiguration = bodyConfiguration.pageTriggerConfiguration;
     final tileHeight = bodyConfiguration.tileHeight;
@@ -43,6 +84,15 @@ class MonthBody<T extends Object?> extends StatelessWidget {
     final dynamicRowHeight = monthBodyConfiguration?.dynamicRowHeight ?? false;
     final maxEventsBeforeOverlay = monthBodyConfiguration?.maxEventsBeforeOverlay;
     final minEventRows = monthBodyConfiguration?.minEventRows ?? 2;
+
+    // Lock scrolling to a single axis per gesture so vertical scrolling and
+    // horizontal month paging don't interfere with each other.
+    final pagePhysics = _lockedAxis == Axis.vertical
+        ? const NeverScrollableScrollPhysics()
+        : monthBodyConfiguration?.pageScrollPhysics;
+    final verticalPhysics = _lockedAxis == Axis.horizontal
+        ? const NeverScrollableScrollPhysics()
+        : (monthBodyConfiguration?.scrollPhysics ?? const ClampingScrollPhysics());
 
     final calendarComponents = provider.components;
     final styles = calendarComponents?.monthComponentStyles?.bodyStyles;
@@ -56,8 +106,9 @@ class MonthBody<T extends Object?> extends StatelessWidget {
         // Calculate the width of a single day.
         final dayWidth = pageWidth / DateTime.daysPerWeek;
 
-        return PageView.builder(
+        final pageView = PageView.builder(
           controller: viewController.pageController,
+          physics: pagePhysics,
           itemCount: pageNavigation.numberOfPages,
           onPageChanged: (index) {
             final visibleRange = pageNavigation.dateTimeRangeFromIndex(index);
@@ -159,6 +210,7 @@ class MonthBody<T extends Object?> extends StatelessWidget {
               });
 
               return SingleChildScrollView(
+                physics: verticalPhysics,
                 child: ConstrainedBox(
                   constraints: BoxConstraints(minHeight: pageHeight),
                   child: Column(mainAxisSize: MainAxisSize.min, children: weeks),
@@ -228,6 +280,16 @@ class MonthBody<T extends Object?> extends StatelessWidget {
               ),
             );
           },
+        );
+
+        // The axis lock is only needed when the body can scroll vertically.
+        if (!dynamicRowHeight) return pageView;
+        return Listener(
+          onPointerDown: _handlePointerDown,
+          onPointerMove: _handlePointerMove,
+          onPointerUp: _handlePointerUp,
+          onPointerCancel: _handlePointerCancel,
+          child: pageView,
         );
       },
     );

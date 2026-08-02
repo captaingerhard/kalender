@@ -104,6 +104,14 @@ class MonthBodyConfiguration<T extends Object?> extends MultiDayHeaderConfigurat
   /// This ensures weeks with few or no events keep a usable, tappable height.
   final int minEventRows;
 
+  /// The [ScrollPhysics] used by the vertical scroll view when
+  /// [dynamicRowHeight] is `true`.
+  final ScrollPhysics? scrollPhysics;
+
+  /// The [ScrollPhysics] used by the horizontal [PageView] that navigates
+  /// between months.
+  final ScrollPhysics? pageScrollPhysics;
+
   MonthBodyConfiguration({
     super.generateMultiDayLayoutFrame,
     super.pageTriggerConfiguration,
@@ -114,6 +122,8 @@ class MonthBodyConfiguration<T extends Object?> extends MultiDayHeaderConfigurat
     this.dynamicRowHeight = false,
     this.maxEventsBeforeOverlay,
     this.minEventRows = 2,
+    this.scrollPhysics,
+    this.pageScrollPhysics,
   })  : assert(
           maxEventsBeforeOverlay == null || maxEventsBeforeOverlay > 0,
           'maxEventsBeforeOverlay must be greater than 0',
