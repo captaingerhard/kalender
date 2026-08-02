@@ -87,9 +87,8 @@ class _MonthBodyState<T extends Object?> extends State<MonthBody<T>> {
 
     // Lock scrolling to a single axis per gesture so vertical scrolling and
     // horizontal month paging don't interfere with each other.
-    final pagePhysics = _lockedAxis == Axis.vertical
-        ? const NeverScrollableScrollPhysics()
-        : monthBodyConfiguration?.pageScrollPhysics;
+    final pagePhysics =
+        _lockedAxis == Axis.vertical ? const NeverScrollableScrollPhysics() : monthBodyConfiguration?.pageScrollPhysics;
     final verticalPhysics = _lockedAxis == Axis.horizontal
         ? const NeverScrollableScrollPhysics()
         : (monthBodyConfiguration?.scrollPhysics ?? const ClampingScrollPhysics());
